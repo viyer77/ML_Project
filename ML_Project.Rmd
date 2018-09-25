@@ -1,0 +1,86 @@
+---
+title: "Practical Machine Learning Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem Statement
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, my goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways.
+
+More information is available from the website here: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+## Reading the data
+
+
+```{r ReadData,cache=TRUE}
+
+#Download the training data
+fileUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+
+# Download the test data
+fileUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+#Create folder if it does not exist and download data
+if(!file.exists("ML"))
+{
+  dir.create("ML")
+  download.file(fileUrl,"ML/pml-training.csv", method="curl") 
+  download.file(fileUrl,"ML/pml-testing.csv", method="curl") 
+}
+library(dplyr)
+currPath <- getwd()
+
+# Read  data
+trainingData <- read.csv(file.path(currPath,"ML","pml-training.csv"))
+testingData <- read.csv(file.path(currPath,"ML","pml-testing.csv"))
+
+```
+
+## Cleaning training data
+```{r CleaningData,cache=TRUE}
+# Assign NA to blank values
+trainingData[trainingData==""] <- NA
+# Only keep columns with no NA's
+trainingData <- trainingData[,colSums(is.na(trainingData))==0]
+# Look at summary of data
+colnames(trainingData)
+# First seven columns do not have predictors, remove them
+trainingData <- trainingData[,-c(1:7)]
+
+```
+
+## Explore training data
+These 52 variables show differentiation for classe
+```{r ExploreData,cache=TRUE}
+library(caret)
+colnames(trainingData)
+#Plot the four sensor readings with respect to classe and look for differentiation
+featurePlot(x=trainingData[ , grepl( "belt" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
+featurePlot(x=trainingData[ , grepl( "arm" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
+featurePlot(x=trainingData[ , grepl( "dumbbell" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
+featurePlot(x=trainingData[ , grepl( "forearm" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
+
+
+```
+
+## Fit Model
+* Out of the 52 variables, use PCA to determine which explain maximum variance 
+* Fit model using random forest which uses resampling for cross validation and picks optimum fit based on accuracy  
+* Display the pca components, 25 components account for 95% of the variance  
+* Print the fitted model including in-sample accuracy  
+* Print the confustion matrix  
+* Predict on the testing data, expect out of sample accuracy to be less than in-sample 
+
+
+```{r FitTheModel, cache=TRUE}
+set.seed(12345)
+fitModel <- train(classe ~ ., method="rf",preProcess="pca",data=trainingData)
+fitModel$preProcess
+print(fitModel)
+fitModel$finalModel$confusion
+ pred <- predict(fitModel,testingData)
+ print(pred)
+```
