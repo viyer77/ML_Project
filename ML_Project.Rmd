@@ -58,10 +58,10 @@ These 52 variables show differentiation for classe
 library(caret)
 colnames(trainingData)
 #Plot the four sensor readings with respect to classe and look for differentiation
-featurePlot(x=trainingData[ , grepl( "belt" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
-featurePlot(x=trainingData[ , grepl( "arm" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
-featurePlot(x=trainingData[ , grepl( "dumbbell" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
-featurePlot(x=trainingData[ , grepl( "forearm" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
+featurePlot(x=trainingData[ , grepl( "yaw" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
+featurePlot(x=trainingData[ , grepl( "pitch" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
+featurePlot(x=trainingData[ , grepl( "roll" , names(trainingData) ) ],y=trainingData$classe,plot="pairs")
+
 
 
 ```
